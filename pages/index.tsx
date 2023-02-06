@@ -141,12 +141,12 @@ export default function Home() {
           </h1>
           <p className="mt-6 text-xl leading-8 text-gray-300">
             <span className="text-[#30CD5A]">
-              We're not another workout app.
+              We&apos;re not another workout app.
             </span>{" "}
             FitScript is a personalized fitness trainer powered by AI that lives
-            in your text messages. We'll help you reach your fitness goals with
-            a personalized workout plan, nutrition advice, and more. All you
-            have to do is text us.
+            in your text messages. We&apos;ll help you reach your fitness goals
+            with a personalized workout plan, nutrition advice, and more. All
+            you have to do is text us.
           </p>
           <div className="mt-10 flex items-center gap-x-6">
             <a
