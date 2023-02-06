@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Dialog } from "@headlessui/react";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import { CheckIcon } from "@heroicons/react/24/outline";
+import ReCAPTCHA from "react-google-recaptcha";
+import axios from "axios";
 
 const navigation = [
   { name: "Product", href: "#" },
@@ -12,8 +14,10 @@ const navigation = [
 
 export default function Home() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [parens, setParens] = useState(false);
+  const [phoneNumber, setPhoneNumber] = useState(""); // The actual phone #, with no formatting
+  const [displayNumber, setDisplayNumber] = useState(phoneNumber); // The phone #, with formatting
+
+  const RECAPTCHA_PUBLIC = process.env.RECAPTCHA_PUBLIC as string;
 
   function handleSubmit(e: any) {
     e.preventDefault();
@@ -27,27 +31,20 @@ export default function Home() {
       return;
     }
 
-    if (e.target.value.length === 1) {
-      if (e.target.value == "+") {
-        e.target.value = "";
-      } else {
-        e.target.value = "+" + e.target.value;
-      }
-    } else if (e.target.value[e.target.value.length - 1] == "+") {
-      return;
-    } else if (e.target.value.length < 5) {
-      setParens(false);
-    } else if (e.target.value.length >= 5 && !parens) {
-      e.target.value =
-        e.target.value.slice(0, 2) + "(" + e.target.value.slice(2);
-      e.target.value =
-        e.target.value.slice(0, 6) + ")" + e.target.value.slice(6);
-      setParens(true);
-    } else if (e.target.value.length > 12) {
-      return;
-    }
+    // TODO: Make this easier to input
 
     setPhoneNumber(e.target.value);
+  }
+
+  async function validateRecaptcha(value: string) {
+    const validated = await axios
+      .get(`/api/validateRecaptcha/${value}`)
+      .then((res) => res.data);
+    if (!validated.success) {
+      console.error(validated.message);
+    } else {
+      console.log("Success!");
+    }
   }
 
   return (
@@ -186,11 +183,11 @@ export default function Home() {
             you have to do is text.
           </p>
           <div className="mt-10 flex flex-col gap-1 gap-x-6 text-white">
-            <h3 className="text-3xl">Enter phone #</h3>
-            <p className="text-xl text-gray-500">
-              (Only valid in the US and Canada)
+            <h3 className="text-3xl ">Sign Up with Phone #</h3>
+            <p className="text-lg text-gray-500">
+              (Only valid in the US and Canada. Include country code +1)
             </p>
-            <div className="w-80 flex justify-end items-center relative">
+            <div className="w-80 flex justify-end items-center relative pt-1">
               <input
                 className="relative py-4 w-full bg-[#30CD5A] rounded-full text-white text-xl placeholder:text-gray-300 border-2 border-gray-700 text-center focus:ring-black"
                 placeholder="+1 (302) 740-9745"
@@ -199,6 +196,11 @@ export default function Home() {
               />
               <CheckIcon className="h-8 w-8 text-black absolute mr-5" />
             </div>
+
+            <ReCAPTCHA
+              sitekey={RECAPTCHA_PUBLIC}
+              onChange={validateRecaptcha}
+            />
           </div>
         </div>
         <div className="mt-16 sm:mt-24 lg:mt-0 lg:flex-shrink-0 lg:flex-grow">
