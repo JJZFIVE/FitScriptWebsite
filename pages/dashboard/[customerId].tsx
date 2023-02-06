@@ -1,54 +1,9 @@
-import { useState } from "react";
 import { Dialog } from "@headlessui/react";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
-import { CheckIcon } from "@heroicons/react/24/outline";
-
-const navigation = [
-  { name: "Product", href: "#" },
-  { name: "Features", href: "#" },
-  { name: "Marketplace", href: "#" },
-  { name: "Company", href: "#" },
-];
+import { useState, useEffect } from "react";
 
 export default function Home() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [parens, setParens] = useState(false);
-
-  function handleSubmit(e: any) {
-    e.preventDefault();
-    console.log(phoneNumber);
-  }
-
-  function handlePhoneNumberChange(e: any) {
-    // If e.target.value is not comprised only of numbers 0-9, do not allow
-    // the change to be made.
-    if (!e.target.value.match(/^[0-9+()]*$/)) {
-      return;
-    }
-
-    if (e.target.value.length === 1) {
-      if (e.target.value == "+") {
-        e.target.value = "";
-      } else {
-        e.target.value = "+" + e.target.value;
-      }
-    } else if (e.target.value[e.target.value.length - 1] == "+") {
-      return;
-    } else if (e.target.value.length < 5) {
-      setParens(false);
-    } else if (e.target.value.length >= 5 && !parens) {
-      e.target.value =
-        e.target.value.slice(0, 2) + "(" + e.target.value.slice(2);
-      e.target.value =
-        e.target.value.slice(0, 6) + ")" + e.target.value.slice(6);
-      setParens(true);
-    } else if (e.target.value.length > 12) {
-      return;
-    }
-
-    setPhoneNumber(e.target.value);
-  }
 
   return (
     <div className="relative isolate bg-gray-800 min-h-screen">
@@ -169,8 +124,8 @@ export default function Home() {
           </Dialog.Panel>
         </Dialog>
       </div>
-      <div className="mx-auto max-w-7xl px-6 py-2 sm:py-16 lg:flex lg:gap-x-10 lg:px-8 lg:py-4">
-        <div className="mx-auto max-w-2xl lg:mx-0 lg:flex-auto lg:pt-20">
+      <div className="mx-auto max-w-7xl px-6 py-24 sm:py-32 lg:flex lg:gap-x-10 lg:px-8 lg:py-4">
+        <div className="mx-auto max-w-2xl lg:mx-0 lg:flex-auto pt-20">
           <h1 className="mt-10 max-w-2xl text-4xl font-bold tracking-tight text-gray-100 sm:text-6xl">
             Your{" "}
             <span className="text-[#30CD5A]">Personal AI Fitness Trainer</span>,{" "}
@@ -185,20 +140,19 @@ export default function Home() {
             with a personalized workout plan, nutrition advice, and more. All
             you have to do is text.
           </p>
-          <div className="mt-10 flex flex-col gap-1 gap-x-6 text-white">
-            <h3 className="text-3xl">Enter phone #</h3>
-            <p className="text-xl text-gray-500">
-              (Only valid in the US and Canada)
-            </p>
-            <div className="w-80 flex justify-end items-center relative">
-              <input
-                className="relative py-4 w-full bg-[#30CD5A] rounded-full text-white text-xl placeholder:text-gray-300 border-2 border-gray-700 text-center focus:ring-black"
-                placeholder="+1 (302) 740-9745"
-                onChange={handlePhoneNumberChange}
-                value={phoneNumber}
-              />
-              <CheckIcon className="h-8 w-8 text-black absolute mr-5" />
-            </div>
+          <div className="mt-10 flex items-center gap-x-6">
+            <a
+              href="#"
+              className="rounded-md bg-[#30CD5A] px-3.5 py-1.5 text-base font-semibold leading-7 text-white shadow-sm hover:opacity-80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+            >
+              Get started
+            </a>
+            <a
+              href="#"
+              className="text-base font-semibold leading-7 text-gray-100"
+            >
+              Learn more <span aria-hidden="true">→</span>
+            </a>
           </div>
         </div>
         <div className="mt-16 sm:mt-24 lg:mt-0 lg:flex-shrink-0 lg:flex-grow">
