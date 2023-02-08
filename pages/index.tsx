@@ -32,6 +32,7 @@ export default function Home() {
 
   const RECAPTCHA_PUBLIC = process.env.RECAPTCHA_PUBLIC as string;
   const API_URL = process.env.API_URL as string;
+  const WEBSITE_SIGNATURE = process.env.WEBSITE_SIGNATURE as string; // Can be found in client side code, but a deterrant from anyone getting a token easily
 
   async function handleSubmit(e: any): Promise<void> {
     e.preventDefault();
@@ -41,13 +42,38 @@ export default function Home() {
       return;
     }
 
-    // TODO: JWT
-    // Successful signup
-    await axios
-      .post(`${API_URL}/signup`, {
-        phone: phone,
-        firstname: firstname,
+    const token = await axios
+      .get(`${API_URL}/get-token`, {
+        params: {
+          phone: phone,
+        },
+        headers: {
+          Authorization:
+            "Bearer " +
+            Buffer.from(WEBSITE_SIGNATURE, "utf-8").toString("base64"),
+        },
       })
+      .then((res) => res.data.token);
+
+    // Sign up the user. Note the params and headers
+    await axios
+      .post(
+        `${API_URL}/signup`,
+        {
+          phone: phone,
+          firstname: firstname,
+        },
+        {
+          // Phone param necessary to validate JWT token + phone number coming from same place
+          params: {
+            phone: phone,
+          },
+          // Bearer token necessary to protect against attacks
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
       .then((res) => toastSuccess(res.data.message))
       .catch((error) => toastError(error.response.data.message));
   }
@@ -72,14 +98,13 @@ export default function Home() {
     const validated = await axios
       .get(`/api/validateRecaptcha/${value}`)
       .then((res) => res.data);
-    if (!validated.success) {
-      console.error(validated.message);
-    } else {
-      setRecaptchaSuccess(true);
-    }
+    if (validated.success) setRecaptchaSuccess(true);
+    else setRecaptchaSuccess(false);
   }
 
   useEffect(() => {
+    setAllowSignup(false);
+
     if (phone.length !== 12) {
       setErrorMsg("Please enter a valid phone number");
       setAllowSignup(false);

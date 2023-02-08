@@ -7,6 +7,7 @@ const nextConfig = {
     RECAPTCHA_PUBLIC: process.env.RECAPTCHA_PUBLIC,
     RECAPTCHA_PRIVATE: process.env.RECAPTCHA_PRIVATE,
     API_URL: process.env.API_URL,
+    WEBSITE_SIGNATURE: process.env.WEBSITE_SIGNATURE,
   },
 };
 
