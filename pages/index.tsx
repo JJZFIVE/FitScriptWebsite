@@ -1,9 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog } from "@headlessui/react";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import { CheckIcon } from "@heroicons/react/24/outline";
 import ReCAPTCHA from "react-google-recaptcha";
 import axios from "axios";
+
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const navigation = [
   { name: "Product", href: "#" },
@@ -14,17 +17,42 @@ const navigation = [
 
 export default function Home() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [phoneNumber, setPhoneNumber] = useState(""); // The actual phone #, with no formatting
-  const [displayNumber, setDisplayNumber] = useState(phoneNumber); // The phone #, with formatting
+  const [phone, setPhone] = useState(""); // The actual phone #, with no formatting
+  const [recaptchaSuccess, setRecaptchaSuccess] = useState(false); // The value of the recaptcha
+  const [errorMsg, setErrorMsg] = useState(""); // The error message to display on toast
+  const [allowSignup, setAllowSignup] = useState(false);
+  const [firstname, setFirstname] = useState("");
+  const [showCheckIcon, setShowCheckIcon] = useState(false);
+
+  const toastSuccess = (message: string) => toast.success(message);
+  const toastError = (message: string) =>
+    toast.error(
+      errorMsg ? `Error signing up: ${message}` : "Error signing up!"
+    );
 
   const RECAPTCHA_PUBLIC = process.env.RECAPTCHA_PUBLIC as string;
+  const API_URL = process.env.API_URL as string;
 
-  function handleSubmit(e: any) {
+  async function handleSubmit(e: any): Promise<void> {
     e.preventDefault();
-    console.log(phoneNumber);
+
+    if (!allowSignup) {
+      toastError(errorMsg);
+      return;
+    }
+
+    // TODO: JWT
+    // Successful signup
+    await axios
+      .post(`${API_URL}/signup`, {
+        phone: phone,
+        firstname: firstname,
+      })
+      .then((res) => toastSuccess(res.data.message))
+      .catch((error) => toastError(error.response.data.message));
   }
 
-  function handlePhoneNumberChange(e: any) {
+  function handlePhoneChange(e: any) {
     // If e.target.value is not comprised only of numbers 0-9, do not allow
     // the change to be made.
     if (!e.target.value.match(/^[0-9+()]*$/)) {
@@ -33,22 +61,66 @@ export default function Home() {
 
     // TODO: Make this easier to input
 
-    setPhoneNumber(e.target.value);
+    setPhone(e.target.value);
   }
 
-  async function validateRecaptcha(value: string) {
+  async function validateRecaptcha(value: string | null): Promise<void> {
+    if (!value) {
+      return;
+    }
+
     const validated = await axios
       .get(`/api/validateRecaptcha/${value}`)
       .then((res) => res.data);
     if (!validated.success) {
       console.error(validated.message);
     } else {
-      console.log("Success!");
+      setRecaptchaSuccess(true);
     }
   }
 
+  useEffect(() => {
+    if (phone.length !== 12) {
+      setErrorMsg("Please enter a valid phone number");
+      setAllowSignup(false);
+      setShowCheckIcon(false);
+      return;
+    } else if (!phone.startsWith("+1")) {
+      setErrorMsg("Phone # must start with +1");
+      setAllowSignup(false);
+      setShowCheckIcon(false);
+      return;
+    } else {
+      setShowCheckIcon(true);
+    }
+
+    if (!recaptchaSuccess) {
+      setErrorMsg("Please complete the reCAPTCHA");
+      setAllowSignup(false);
+      setShowCheckIcon(false);
+      return;
+    }
+
+    setErrorMsg("");
+    setAllowSignup(true);
+  }, [recaptchaSuccess, phone]);
+
   return (
     <div className="relative isolate bg-gray-800 min-h-screen">
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
+      {/* Same as */}
+      <ToastContainer />
       <svg
         className="absolute inset-0 -z-10 h-full w-full stroke-gray-200 [mask-image:radial-gradient(100%_100%_at_top_right,white,transparent)]"
         aria-hidden="true"
@@ -170,7 +242,7 @@ export default function Home() {
         <div className="mx-auto max-w-2xl lg:mx-0 lg:flex-auto lg:pt-20">
           <h1 className="mt-10 max-w-2xl text-4xl font-bold tracking-tight text-gray-100 sm:text-6xl">
             Your{" "}
-            <span className="text-[#30CD5A]">Personal AI Fitness Trainer</span>,{" "}
+            <span className="text-[#30CD5A]">Personal AI Fitness Trainer</span>,
             Right in Your Texts
           </h1>
           <p className="mt-6 text-xl leading-8 text-gray-300">
@@ -187,20 +259,44 @@ export default function Home() {
             <p className="text-lg text-gray-500">
               (Only valid in the US and Canada. Include country code +1)
             </p>
+
+            {/* Phone input */}
             <div className="w-80 flex justify-end items-center relative pt-1">
               <input
                 className="relative py-4 w-full bg-[#30CD5A] rounded-full text-white text-xl placeholder:text-gray-300 border-2 border-gray-700 text-center focus:ring-black"
                 placeholder="+1 (302) 740-9745"
-                onChange={handlePhoneNumberChange}
-                value={phoneNumber}
+                onChange={handlePhoneChange}
+                value={phone}
               />
-              <CheckIcon className="h-8 w-8 text-black absolute mr-5" />
+              {showCheckIcon && (
+                <CheckIcon className="h-8 w-8 text-black absolute mr-5" />
+              )}
+            </div>
+
+            {/* name input  */}
+            <div className="w-80 flex justify-end items-center relative pt-1">
+              <input
+                className="relative py-4 w-full bg-[#30CD5A] rounded-full text-white text-xl placeholder:text-gray-300 border-2 border-gray-700 text-center focus:ring-black"
+                placeholder="Firstname"
+                onChange={(e) => setFirstname(e.target.value)}
+                value={firstname}
+              />
+              {/* {showCheckIcon && (
+                <CheckIcon className="h-8 w-8 text-black absolute mr-5" />
+              )} */}
             </div>
 
             <ReCAPTCHA
               sitekey={RECAPTCHA_PUBLIC}
               onChange={validateRecaptcha}
             />
+
+            <button
+              className="px-4 py-2 bg-black rounded-full"
+              onClick={handleSubmit}
+            >
+              Sign Up
+            </button>
           </div>
         </div>
         <div className="mt-16 sm:mt-24 lg:mt-0 lg:flex-shrink-0 lg:flex-grow">

@@ -6,6 +6,7 @@ const nextConfig = {
   env: {
     RECAPTCHA_PUBLIC: process.env.RECAPTCHA_PUBLIC,
     RECAPTCHA_PRIVATE: process.env.RECAPTCHA_PRIVATE,
+    API_URL: process.env.API_URL,
   },
 };
 
