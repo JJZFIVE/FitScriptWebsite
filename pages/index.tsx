@@ -131,7 +131,7 @@ export default function Home() {
   }, [recaptchaSuccess, phone]);
 
   return (
-    <div className="relative isolate bg-gray-800 min-h-screen">
+    <div className="relative isolate bg-gray-100 min-h-screen">
       <ToastContainer
         position="top-right"
         autoClose={5000}
