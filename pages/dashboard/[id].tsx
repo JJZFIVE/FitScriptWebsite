@@ -5,7 +5,7 @@ import "react-toastify/dist/ReactToastify.css";
 
 import getGreeting from "../../utils/getGreeting";
 
-const tabs = [
+const tabs: { name: string; href: string; current: boolean }[] = [
   { name: "Fitness", href: "#", current: true },
   { name: "Billing", href: "#", current: false },
   { name: "Settings", href: "#", current: false },
@@ -71,7 +71,8 @@ export default function Dashboard() {
                     id="selected-tab"
                     name="selected-tab"
                     className="mt-1 block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-green-500 focus:outline-none focus:ring-green-500 sm:text-sm"
-                    defaultValue={tabs.find((tab) => tab.current).name}
+                    defaultValue={"Fitness"}
+                    //  ^ This used to be tabs.find((tab) => tab.current).name. Was causing an error, but look into what it did
                   >
                     {tabs.map((tab) => (
                       <option key={tab.name}>{tab.name}</option>
