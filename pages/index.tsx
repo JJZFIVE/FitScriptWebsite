@@ -4,6 +4,7 @@ import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import { CheckIcon } from "@heroicons/react/24/outline";
 import ReCAPTCHA from "react-google-recaptcha";
 import axios from "axios";
+import Link from "next/link";
 
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -45,9 +46,6 @@ export default function Home() {
     // Gets a token of 10 second length, for quick operation such as signing up
     const token = await axios
       .get(`${API_URL}/auth/get-short-token`, {
-        params: {
-          phone: phone,
-        },
         headers: {
           Authorization:
             "Bearer " +
@@ -56,7 +54,7 @@ export default function Home() {
       })
       .then((res) => res.data.token);
 
-    // Sign up the user. Note the params and headers
+    // Sign up the user. Note the authorization header
     await axios
       .post(
         `${API_URL}/signup`,
@@ -65,10 +63,6 @@ export default function Home() {
           firstname: firstname,
         },
         {
-          // Phone param necessary to validate JWT token + phone number coming from same place
-          params: {
-            phone: phone,
-          },
           // Bearer token necessary to protect against attacks
           headers: {
             Authorization: `Bearer ${token}`,
@@ -208,13 +202,14 @@ export default function Home() {
               </a>
             ))}
           </div>
-          <div className="hidden lg:flex lg:flex-1 lg:justify-end">
-            <a
-              href="#"
-              className="text-sm font-semibold leading-6 text-[#30CD5A]"
-            >
-              Log in <span aria-hidden="true">&rarr;</span>
-            </a>
+
+          {/* TODO: DYNAMICALLY ROUTE TO THEIR PAGE */}
+          <div className="hidden lg:flex lg:flex-1 lg:justify-end ">
+            <Link href="/dashboard/+13027409745">
+              <button className="text-sm font-semibold leading-6 text-[#30CD5A]">
+                Dashboard <span aria-hidden="true">&rarr;</span>
+              </button>
+            </Link>
           </div>
         </nav>
         <Dialog as="div" open={mobileMenuOpen} onClose={setMobileMenuOpen}>

@@ -6,6 +6,7 @@ import "react-toastify/dist/ReactToastify.css";
 import type { Customer, Goal, Benchmark } from "../../types/db";
 import type { DashboardData } from "../../types/dashboard";
 import { XMarkIcon } from "@heroicons/react/24/outline";
+import Link from "next/link";
 
 // TODO GET A JWT ACCESS TOKEN UPON SIGN IN WITH A LONG TIME.
 // IF ERRORS, TOAST WILL TELL THEM. SERVER CHECKTOKEN WILL RETURN error.message
@@ -32,6 +33,9 @@ export default function Dashboard({
   const [errorMsg, setErrorMsg] = useState("");
   const [greeting, setGreeting] = useState("");
 
+  const API_URL = process.env.API_URL as string;
+  const WEBSITE_SIGNATURE = process.env.WEBSITE_SIGNATURE as string; // Can be found in client side code, but a deterrant from anyone getting a token easily
+
   // Info
   const [goal, setGoal] = useState(dashboardData.goal.value);
   const [frequency, setFrequency] = useState(dashboardData.goal.frequency);
@@ -42,24 +46,45 @@ export default function Dashboard({
 
   // MOVE TO UTILS
   async function updateGoal(newGoal: string, callback: any) {
-    console.log("UPDATING GOAL...", newGoal);
-
-    callback(true);
+    await axios
+      .put(
+        `${API_URL}/customer/update-goal`,
+        {
+          setting: "value",
+          newValue: newGoal,
+        }
+        // {
+        //   headers: {
+        //     Authorization: `Bearer ${accessToken}`,
+        //   },
+        // }
+      )
+      .then((res) => callback(true, res.data.message))
+      .catch((error) => callback(false, error.message));
   }
 
   async function updateFrequency(newFrequency: string | null, callback: any) {
-    console.log("UPDATING FREQUENCY.....", newFrequency);
-
-    callback(true);
+    await axios
+      .put(
+        `${API_URL}/customer/update-goal`,
+        {
+          setting: "frequency",
+          newValue: newFrequency,
+        }
+        // {
+        //   headers: {
+        //     Authorization: `Bearer ${accessToken}`,
+        //   },
+        // }
+      )
+      .then((res) => callback(true, res.data.message))
+      .catch((error) => callback(false, error.message));
   }
 
   // Toast stuff
   const toastSuccess = (message: string) => toast.success(message);
   const toastError = (message: string) =>
     toast.error(errorMsg ? `Error: ${message}` : "Unknown error occurred");
-
-  const API_URL = process.env.API_URL as string;
-  const WEBSITE_SIGNATURE = process.env.WEBSITE_SIGNATURE as string; // Can be found in client side code, but a deterrant from anyone getting a token easily
 
   // TODO: SIGN IN WITH PASSWORD
   useEffect(() => {
@@ -83,9 +108,11 @@ export default function Dashboard({
       />
       {/* Icon in top left, "Navbar" */}
       <div className="absolute inset-x-0 top-0 z-10 py-3 mx-4 flex gap-4 text-gray-900 items-center">
-        <button onClick={() => {}}>
-          <img src="/placeholder.png" alt="" height="50" width="50" />
-        </button>
+        <Link href="/">
+          <button onClick={() => {}}>
+            <img src="/placeholder.png" alt="" height="50" width="50" />
+          </button>
+        </Link>
         <span className="text-2xl">FitScript</span>
       </div>
 
@@ -164,7 +191,7 @@ export default function Dashboard({
                             <span className="max-w-sm break-all">{goal}</span>
                           ) : (
                             <textarea
-                              className="w-80 break-all p-2 border-gray-400 border rounded-sm"
+                              className="w-80 break-all p-2 border-gray-400 border rounded-sm "
                               value={goal}
                               onChange={(e) => setGoal(e.target.value)}
                             />
@@ -195,13 +222,16 @@ export default function Dashboard({
                                 onClick={() => {
                                   setUpdatingGoal(false);
 
-                                  updateGoal(goal, (success: boolean) => {
-                                    if (success) {
-                                      toastSuccess("Goal updated successfully");
-                                    } else {
-                                      toastError("Failed to update goal");
+                                  updateGoal(
+                                    goal,
+                                    (success: boolean, message: string) => {
+                                      if (success) {
+                                        toastSuccess(message);
+                                      } else {
+                                        toastError(message);
+                                      }
                                     }
-                                  });
+                                  );
                                 }}
                               >
                                 Confirm
@@ -252,15 +282,11 @@ export default function Dashboard({
 
                                   updateFrequency(
                                     frequency,
-                                    (success: boolean) => {
+                                    (success: boolean, message: string) => {
                                       if (success) {
-                                        toastSuccess(
-                                          "Workout frequency updated successfully"
-                                        );
+                                        toastSuccess(message);
                                       } else {
-                                        toastError(
-                                          "Failed to update workout frequency"
-                                        );
+                                        toastError(message);
                                       }
                                     }
                                   );
@@ -409,7 +435,10 @@ function Checkboxes({
       <legend className="sr-only">Frequency</legend>
 
       {days.map((day, idx) => (
-        <div className="relative flex flex-col items-center justify-center px-1 ">
+        <div
+          className="relative flex flex-col items-center justify-center px-1 "
+          key={idx}
+        >
           <div className="text-lg text-black pb-2">{day}</div>
           <div className="flex h-5 items-center">
             <input
