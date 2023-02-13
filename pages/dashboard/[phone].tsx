@@ -7,6 +7,7 @@ import type { Customer, Goal } from "../../types/db";
 import type { DashboardData } from "../../types/dashboard";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
+import Cookies from "js-cookie";
 
 // TODO GET A JWT ACCESS TOKEN UPON SIGN IN WITH A LONG TIME.
 // IF ERRORS, TOAST WILL TELL THEM. SERVER CHECKTOKEN WILL RETURN error.message
@@ -29,7 +30,6 @@ export default function Dashboard({
 }: {
   dashboardData: DashboardData;
 }) {
-  const [accessToken, setAccessToken] = useState("");
   const [greeting, setGreeting] = useState("");
 
   const API_URL = process.env.API_URL as string;
@@ -87,12 +87,12 @@ export default function Dashboard({
         {
           benchmark: "bench",
           newValue: newBench,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${Cookies.get("access_token")}`,
+          },
         }
-        // {
-        //   headers: {
-        //     Authorization: `Bearer ${accessToken}`,
-        //   },
-        // }
       )
       .then((res) => callback(true, res.data.message))
       .catch((error) => {
@@ -108,12 +108,12 @@ export default function Dashboard({
         {
           benchmark: "squat",
           newValue: newSquat,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${Cookies.get("access_token")}`,
+          },
         }
-        // {
-        //   headers: {
-        //     Authorization: `Bearer ${accessToken}`,
-        //   },
-        // }
       )
       .then((res) => callback(true, res.data.message))
       .catch((error) => {
@@ -129,12 +129,12 @@ export default function Dashboard({
         {
           benchmark: "deadlift",
           newValue: newDeadlift,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${Cookies.get("access_token")}`,
+          },
         }
-        // {
-        //   headers: {
-        //     Authorization: `Bearer ${accessToken}`,
-        //   },
-        // }
       )
       .then((res) => callback(true, res.data.message))
       .catch((error) => {
@@ -151,12 +151,12 @@ export default function Dashboard({
         {
           setting: "value",
           newValue: newGoal,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${Cookies.get("access_token")}`,
+          },
         }
-        // {
-        //   headers: {
-        //     Authorization: `Bearer ${accessToken}`,
-        //   },
-        // }
       )
       .then((res) => callback(true, res.data.message))
       .catch((error) => {
@@ -172,12 +172,12 @@ export default function Dashboard({
         {
           setting: "frequency",
           newValue: newFrequency,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${Cookies.get("access_token")}`,
+          },
         }
-        // {
-        //   headers: {
-        //     Authorization: `Bearer ${accessToken}`,
-        //   },
-        // }
       )
       .then((res) => callback(true, res.data.message))
       .catch((error) => callback(false, error.response.data?.message));
@@ -585,23 +585,44 @@ function Checkboxes({
 
 // This gets called on every request
 export async function getServerSideProps(context: any) {
-  const phone = context.params.phone;
   const API_URL = process.env.API_URL as string;
+  const phone = context.params.phone;
+  const cookies = context.req.cookies;
+  const accessToken = cookies["access_token"];
 
-  // Check for localstorage cookie access token
-  // If localstorage cookie continue and pass to Authorization header in dashboard data
-  // If no localstorage cookie, get one from getToken
+  // If no access token in cookies, send them to login page
+  if (!accessToken) {
+    return {
+      redirect: {
+        destination: `/dashboard/login?phone=${phone}`,
+        permanent: false,
+      },
+    };
+  }
 
-  // Also check that their token is even the valid one for their phone number
+  // Check if access token is valid for this dashboard's phone # and is valid in general
+  const isTokenValidData = await axios
+    .post(`${API_URL}/auth/verify-token`, {
+      token: accessToken,
+    })
+    .then((res) => res.data)
+    .catch((error) => error.response.data);
+
+  if (!isTokenValidData.success || isTokenValidData.decodedPhone !== phone) {
+    return {
+      redirect: {
+        destination: `/dashboard/login?phone=${phone}`,
+        permanent: false,
+      },
+    };
+  }
 
   // Fetch data from external API
-  // TODO: Switch to API_URL
-  // TODO: Add Authorization header token
   try {
     const dashboardData = await axios
-      .get(`http://localhost:6969/dashboard/data/${phone}`, {
+      .get(`${API_URL}/dashboard/data/${phone}`, {
         headers: {
-          Authorization: "Bearer " + "",
+          Authorization: `Bearer ${accessToken}`,
         },
       })
       .then((response) => response.data);
