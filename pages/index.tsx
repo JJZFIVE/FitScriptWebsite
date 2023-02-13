@@ -42,8 +42,9 @@ export default function Home() {
       return;
     }
 
+    // Gets a token of 10 second length, for quick operation such as signing up
     const token = await axios
-      .get(`${API_URL}/get-token`, {
+      .get(`${API_URL}/auth/get-short-token`, {
         params: {
           phone: phone,
         },
@@ -144,8 +145,7 @@ export default function Home() {
         pauseOnHover
         theme="light"
       />
-      {/* Same as */}
-      <ToastContainer />
+
       <svg
         className="absolute inset-0 -z-10 h-full w-full stroke-gray-200 [mask-image:radial-gradient(100%_100%_at_top_right,white,transparent)]"
         aria-hidden="true"
@@ -202,7 +202,7 @@ export default function Home() {
               <a
                 key={item.name}
                 href={item.href}
-                className="text-sm font-semibold leading-6 text-gray-100"
+                className="text-sm font-semibold leading-6 text-gray-900"
               >
                 {item.name}
               </a>
@@ -265,12 +265,12 @@ export default function Home() {
       </div>
       <div className="mx-auto max-w-7xl px-6 py-2 sm:py-16 lg:flex lg:gap-x-10 lg:px-8 lg:py-4">
         <div className="mx-auto max-w-2xl lg:mx-0 lg:flex-auto lg:pt-20">
-          <h1 className="mt-10 max-w-2xl text-4xl font-bold tracking-tight text-gray-100 sm:text-6xl">
+          <h1 className="mt-10 max-w-2xl text-4xl font-bold tracking-tight text-gray-800 sm:text-6xl">
             Your{" "}
             <span className="text-[#30CD5A]">Personal AI Fitness Trainer</span>,
             Right in Your Texts
           </h1>
-          <p className="mt-6 text-xl leading-8 text-gray-300">
+          <p className="mt-6 text-xl leading-8 text-gray-800">
             <span className="text-[#30CD5A]">
               We&apos;re not another workout app.
             </span>{" "}
@@ -279,7 +279,7 @@ export default function Home() {
             with a personalized workout plan, nutrition advice, and more. All
             you have to do is text.
           </p>
-          <div className="mt-10 flex flex-col gap-1 gap-x-6 text-white">
+          <div className="mt-10 flex flex-col gap-1 gap-x-6 text-black">
             <h3 className="text-3xl ">Sign Up with Phone #</h3>
             <p className="text-lg text-gray-500">
               (Only valid in the US and Canada. Include country code +1)
@@ -288,8 +288,8 @@ export default function Home() {
             {/* Phone input */}
             <div className="w-80 flex justify-end items-center relative pt-1">
               <input
-                className="relative py-4 w-full bg-[#30CD5A] rounded-full text-white text-xl placeholder:text-gray-300 border-2 border-gray-700 text-center focus:ring-black"
-                placeholder="+1 (302) 740-9745"
+                className="relative py-4 w-full bg-[#30CD5A] rounded-full text-black text-xl placeholder:text-gray-300 border-2 border-gray-700 text-center focus:ring-black"
+                placeholder="Enter phone"
                 onChange={handlePhoneChange}
                 value={phone}
               />
@@ -301,7 +301,7 @@ export default function Home() {
             {/* name input  */}
             <div className="w-80 flex justify-end items-center relative pt-1">
               <input
-                className="relative py-4 w-full bg-[#30CD5A] rounded-full text-white text-xl placeholder:text-gray-300 border-2 border-gray-700 text-center focus:ring-black"
+                className="relative py-4 w-full bg-[#30CD5A] rounded-full text-black text-xl placeholder:text-gray-300 border-2 border-gray-700 text-center focus:ring-black"
                 placeholder="Firstname"
                 onChange={(e) => setFirstname(e.target.value)}
                 value={firstname}
@@ -317,7 +317,7 @@ export default function Home() {
             />
 
             <button
-              className="px-4 py-2 bg-black rounded-full"
+              className="px-4 py-2 bg-black rounded-full text-white"
               onClick={handleSubmit}
             >
               Sign Up
