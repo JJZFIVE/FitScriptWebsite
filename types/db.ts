@@ -16,15 +16,6 @@ type Goal = {
   timestamp: Date;
 };
 
-type Benchmark = {
-  id: string;
-  type: string;
-  value: string;
-  units: string;
-  customer_phone: string;
-  timestamp: Date;
-};
-
 type Request = {
   id: string;
   request_text: string;
@@ -32,4 +23,4 @@ type Request = {
   customer_phone: string;
 };
 
-export type { Customer, Goal, Benchmark, Request };
+export type { Customer, Goal, Request };

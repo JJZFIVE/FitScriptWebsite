@@ -3,7 +3,7 @@ import type { GetServerSideProps } from "next";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import type { Customer, Goal, Benchmark } from "../../types/db";
+import type { Customer, Goal } from "../../types/db";
 import type { DashboardData } from "../../types/dashboard";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
@@ -35,13 +35,113 @@ export default function Dashboard({
   const API_URL = process.env.API_URL as string;
   const WEBSITE_SIGNATURE = process.env.WEBSITE_SIGNATURE as string; // Can be found in client side code, but a deterrant from anyone getting a token easily
 
-  // Info
+  // Goal, frequency, and benchmark state values
   const [goal, setGoal] = useState(dashboardData.goal.value);
   const [frequency, setFrequency] = useState(dashboardData.goal.frequency);
+  const [benchBM, setBenchBM] = useState(dashboardData.benchmarks.bench);
+  const [squatBM, setSquatBM] = useState(dashboardData.benchmarks.squat);
+  const [deadliftBM, setDeadliftBM] = useState(
+    dashboardData.benchmarks.deadlift
+  );
 
   // Updating info
   const [updatingGoal, setUpdatingGoal] = useState(false);
   const [updatingFrequency, setUpdatingFrequency] = useState(false);
+  const [updatingBench, setUpdatingBench] = useState(false);
+  const [updatingSquat, setUpdatingSquat] = useState(false);
+  const [updatingDeadlift, setUpdatingDeadlift] = useState(false);
+
+  // Stuff for benchmark mapping
+  const availableBenchmarks = ["bench", "squat", "deadlift"];
+  const availableBenchmarkData = {
+    bench: {
+      name: "Bench",
+      updatingFunction: setUpdatingBench,
+      updatingValue: updatingBench,
+      value: benchBM,
+      setValue: setBenchBM,
+      completeUpdateFunction: updateBench,
+    },
+    squat: {
+      name: "Squat",
+      updatingFunction: setUpdatingSquat,
+      updatingValue: updatingSquat,
+      value: squatBM,
+      setValue: setSquatBM,
+      completeUpdateFunction: updateSquat,
+    },
+    deadlift: {
+      name: "Deadlift",
+      updatingFunction: setUpdatingDeadlift,
+      updatingValue: updatingDeadlift,
+      value: deadliftBM,
+      setValue: setDeadliftBM,
+      completeUpdateFunction: updateDeadlift,
+    },
+  };
+
+  async function updateBench(newBench: number, callback: any) {
+    await axios
+      .post(
+        `${API_URL}/customer/update-benchmark`,
+        {
+          benchmark: "bench",
+          newValue: newBench,
+        }
+        // {
+        //   headers: {
+        //     Authorization: `Bearer ${accessToken}`,
+        //   },
+        // }
+      )
+      .then((res) => callback(true, res.data.message))
+      .catch((error) => {
+        console.error(error);
+        callback(false, error.response.data?.message);
+      });
+  }
+
+  async function updateSquat(newSquat: number, callback: any) {
+    await axios
+      .post(
+        `${API_URL}/customer/update-benchmark`,
+        {
+          benchmark: "squat",
+          newValue: newSquat,
+        }
+        // {
+        //   headers: {
+        //     Authorization: `Bearer ${accessToken}`,
+        //   },
+        // }
+      )
+      .then((res) => callback(true, res.data.message))
+      .catch((error) => {
+        console.error(error);
+        callback(false, error.response.data?.message);
+      });
+  }
+
+  async function updateDeadlift(newDeadlift: number, callback: any) {
+    await axios
+      .post(
+        `${API_URL}/customer/update-benchmark`,
+        {
+          benchmark: "deadlift",
+          newValue: newDeadlift,
+        }
+        // {
+        //   headers: {
+        //     Authorization: `Bearer ${accessToken}`,
+        //   },
+        // }
+      )
+      .then((res) => callback(true, res.data.message))
+      .catch((error) => {
+        console.error(error);
+        callback(false, error.response.data?.message);
+      });
+  }
 
   // MOVE TO UTILS
   async function updateGoal(newGoal: string, callback: any) {
@@ -140,7 +240,7 @@ export default function Dashboard({
                   <select
                     id="selected-tab"
                     name="selected-tab"
-                    className="mt-1 block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-green-500 focus:outline-none focus:ring-green-500 sm:text-sm"
+                    className="mt-1 block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-black focus:outline-none focus:ring-black sm:text-sm"
                     defaultValue={"Fitness"}
                     //  ^ This used to be tabs.find((tab) => tab.current).name. Was causing an error, but look into what it did
                   >
@@ -158,7 +258,7 @@ export default function Dashboard({
                           href={tab.href}
                           className={classNames(
                             tab.current
-                              ? "border-green-500 text-green-600"
+                              ? "border-black text-black"
                               : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700",
                             "whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm"
                           )}
@@ -307,7 +407,7 @@ export default function Dashboard({
                 {/* TODO: ONLY THIS FOR PREMIUM USERS. GRAY THESE OUT IF NOT PREMIUM AND GIVE AN "UPGRADE BOX" */}
                 <div className="mt-10 divide-y divide-gray-200">
                   <div className="space-y-1">
-                    <h3 className="text-xl font-medium leading-6 text-gray-900">
+                    <h3 className="text-2xl font-medium leading-6 text-gray-900">
                       Benchmarks
                     </h3>
                     <p className="max-w-2xl text-sm text-gray-500">
@@ -321,88 +421,112 @@ export default function Dashboard({
                   <div className="mt-6">
                     <dl className="divide-y divide-gray-200">
                       {/* TODO: Make this a .map() */}
-                      <div className="py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:py-5">
-                        <dt className="text-sm font-medium text-gray-900">
-                          Bench Press
-                        </dt>
-                        <dd className="mt-1 flex text-sm text-gray-700 sm:col-span-2 sm:mt-0">
-                          <span className="flex-grow">185 lbs</span>
-                          <span className="ml-4 flex-shrink-0">
-                            <button
-                              type="button"
-                              className="rounded-md bg-white font-medium text-green-600 hover:text-green-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
-                            >
-                              Update
-                            </button>
-                          </span>
-                        </dd>
-                      </div>
-                      <div className="py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:py-5">
-                        <dt className="text-sm font-medium text-gray-900">
-                          Bench Press
-                        </dt>
-                        <dd className="mt-1 flex text-sm text-gray-700 sm:col-span-2 sm:mt-0">
-                          <span className="flex-grow">185 lbs</span>
-                          <span className="ml-4 flex-shrink-0">
-                            <button
-                              type="button"
-                              className="rounded-md bg-white font-medium text-green-600 hover:text-green-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
-                            >
-                              Update
-                            </button>
-                          </span>
-                        </dd>
-                      </div>
-                      <div className="py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:py-5">
-                        <dt className="text-sm font-medium text-gray-900">
-                          Back Squat
-                        </dt>
-                        <dd className="mt-1 flex text-sm text-gray-700 sm:col-span-2 sm:mt-0">
-                          <span className="flex-grow">225 lbs</span>
-                          <span className="ml-4 flex-shrink-0">
-                            <button
-                              type="button"
-                              className="rounded-md bg-white font-medium text-green-600 hover:text-green-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
-                            >
-                              Update
-                            </button>
-                          </span>
-                        </dd>
-                      </div>
-                      <div className="py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:py-5">
-                        <dt className="text-sm font-medium text-gray-900">
-                          Standard Deadlift
-                        </dt>
-                        <dd className="mt-1 flex text-sm text-gray-700 sm:col-span-2 sm:mt-0">
-                          <span className="flex-grow">305 lbs</span>
-                          <span className="ml-4 flex-shrink-0">
-                            <button
-                              type="button"
-                              className="rounded-md bg-white font-medium text-green-600 hover:text-green-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
-                            >
-                              Update
-                            </button>
-                          </span>
-                        </dd>
-                      </div>
-                      <div className="py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:py-5">
-                        <dt className="text-sm font-medium text-gray-900">
-                          1 Mile Run
-                        </dt>
-                        <dd className="mt-1 flex text-sm text-gray-700 sm:col-span-2 sm:mt-0">
-                          <span className="flex-grow">
-                            7 minutes, 46 seconds
-                          </span>
-                          <span className="ml-4 flex-shrink-0">
-                            <button
-                              type="button"
-                              className="rounded-md bg-white font-medium text-green-600 hover:text-green-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
-                            >
-                              Update
-                            </button>
-                          </span>
-                        </dd>
-                      </div>
+                      {availableBenchmarks.map((name, idx) => (
+                        <div
+                          className="py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:py-5"
+                          key={idx}
+                        >
+                          <dt className="text-lg font-medium text-gray-900">
+                            {
+                              availableBenchmarkData[
+                                name as keyof typeof availableBenchmarkData
+                              ].name
+                            }
+                          </dt>
+                          <dd className="mt-1 flex justify-between text-sm text-gray-700 sm:col-span-2 sm:mt-0">
+                            {!availableBenchmarkData[
+                              name as keyof typeof availableBenchmarkData
+                            ].updatingValue ? (
+                              <span className="break-all max-w-xs">
+                                {availableBenchmarkData[
+                                  name as keyof typeof availableBenchmarkData
+                                ].value
+                                  ? availableBenchmarkData[
+                                      name as keyof typeof availableBenchmarkData
+                                    ].value + " lbs"
+                                  : "(Not set)"}
+                              </span>
+                            ) : (
+                              <input
+                                className="w-40 break-all p-2 border-gray-400 border rounded-sm "
+                                value={
+                                  availableBenchmarkData[
+                                    name as keyof typeof availableBenchmarkData
+                                  ].value as
+                                    | string
+                                    | number
+                                    | readonly string[]
+                                    | undefined
+                                }
+                                onChange={(e) =>
+                                  availableBenchmarkData[
+                                    name as keyof typeof availableBenchmarkData
+                                  ].setValue(parseFloat(e.target.value))
+                                }
+                              />
+                            )}
+
+                            {/* Button to update benchmark */}
+                            {!availableBenchmarkData[
+                              name as keyof typeof availableBenchmarkData
+                            ].updatingValue ? (
+                              <span className="ml-4 flex-shrink-0">
+                                <button
+                                  className="rounded-2xl px-2 py-1 text-sm bg-black font-medium text-white hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-gray-800 focus:ring-offset-2"
+                                  onClick={() =>
+                                    availableBenchmarkData[
+                                      name as keyof typeof availableBenchmarkData
+                                    ].updatingFunction(true)
+                                  }
+                                >
+                                  Update
+                                </button>
+                              </span>
+                            ) : (
+                              <span className="ml-4 flex items-center gap-3">
+                                <button
+                                  className="rounded-full text-sm bg-white border-black border-2 font-medium text-black hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-gray-800 focus:ring-offset-2"
+                                  onClick={() =>
+                                    availableBenchmarkData[
+                                      name as keyof typeof availableBenchmarkData
+                                    ].updatingFunction(false)
+                                  }
+                                >
+                                  <XMarkIcon
+                                    className="h-6 w-6"
+                                    aria-hidden="true"
+                                  />
+                                </button>
+                                <button
+                                  className="rounded-2xl px-2 py-1 text-sm bg-black font-medium text-white hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-gray-800 focus:ring-offset-2"
+                                  onClick={() => {
+                                    availableBenchmarkData[
+                                      name as keyof typeof availableBenchmarkData
+                                    ].updatingFunction(false);
+
+                                    availableBenchmarkData[
+                                      name as keyof typeof availableBenchmarkData
+                                    ].completeUpdateFunction(
+                                      availableBenchmarkData[
+                                        name as keyof typeof availableBenchmarkData
+                                      ].value as number,
+                                      (success: boolean, message: string) => {
+                                        if (success) {
+                                          toastSuccess(message);
+                                        } else {
+                                          toastError(message);
+                                        }
+                                      }
+                                    );
+                                  }}
+                                >
+                                  Confirm
+                                </button>
+                              </span>
+                            )}
+                          </dd>
+                        </div>
+                      ))}
                     </dl>
                   </div>
                 </div>
