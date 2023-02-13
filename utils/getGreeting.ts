@@ -7,6 +7,7 @@ export default function getGreeting() {
     "Hey there,",
     "Howdy,",
     "Welcome",
+    "Rise and grind,",
   ];
 
   const answer = greetings[Math.floor(Math.random() * greetings.length)];

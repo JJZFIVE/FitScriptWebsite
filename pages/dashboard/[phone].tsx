@@ -30,7 +30,6 @@ export default function Dashboard({
   dashboardData: DashboardData;
 }) {
   const [accessToken, setAccessToken] = useState("");
-  const [errorMsg, setErrorMsg] = useState("");
   const [greeting, setGreeting] = useState("");
 
   const API_URL = process.env.API_URL as string;
@@ -60,7 +59,10 @@ export default function Dashboard({
         // }
       )
       .then((res) => callback(true, res.data.message))
-      .catch((error) => callback(false, error.message));
+      .catch((error) => {
+        console.log(error);
+        callback(false, error.response.data?.message);
+      });
   }
 
   async function updateFrequency(newFrequency: string | null, callback: any) {
@@ -78,13 +80,13 @@ export default function Dashboard({
         // }
       )
       .then((res) => callback(true, res.data.message))
-      .catch((error) => callback(false, error.message));
+      .catch((error) => callback(false, error.response.data?.message));
   }
 
   // Toast stuff
   const toastSuccess = (message: string) => toast.success(message);
   const toastError = (message: string) =>
-    toast.error(errorMsg ? `Error: ${message}` : "Unknown error occurred");
+    toast.error(message ? `Error: ${message}` : "Unknown error occurred");
 
   // TODO: SIGN IN WITH PASSWORD
   useEffect(() => {
@@ -250,7 +252,6 @@ export default function Dashboard({
                               frequency={frequency}
                               setFrequency={setFrequency}
                               updatingFrequency={updatingFrequency}
-                              setUpdatingFrequency={setUpdatingFrequency}
                             />
                           </span>
 
@@ -419,19 +420,17 @@ function Checkboxes({
   frequency,
   setFrequency,
   updatingFrequency,
-  setUpdatingFrequency,
 }: {
   frequency: string | null;
   setFrequency: any;
   updatingFrequency: boolean;
-  setUpdatingFrequency: any;
 }) {
   if (!frequency) return null;
 
   const days = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
 
   return (
-    <fieldset className="gap-5 flex">
+    <fieldset className="gap-3 md:gap-5 flex">
       <legend className="sr-only">Frequency</legend>
 
       {days.map((day, idx) => (
