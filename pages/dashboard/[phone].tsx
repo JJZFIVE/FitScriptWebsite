@@ -618,6 +618,7 @@ export async function getServerSideProps(context: any) {
   }
 
   // Fetch data from external API
+
   try {
     const dashboardData = await axios
       .get(`${API_URL}/dashboard/data/${phone}`, {
