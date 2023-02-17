@@ -1,20 +1,20 @@
 import Cookies from "js-cookie";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/router";
-import axios from "axios";
+import apiAxios from "../../utils/apiAxios";
 
 export default function Login({ phone }: { phone: string }) {
   const router = useRouter();
   const [phoneNumber, setPhoneNumber] = useState(phone);
   const [password, setPassword] = useState("");
+  const [test, setTest] = useState(phone);
 
-  const API_URL = process.env.API_URL as string;
   const WEBSITE_SIGNATURE = process.env.WEBSITE_SIGNATURE as string;
 
   async function signin() {
-    await axios
+    await apiAxios
       .post(
-        `${API_URL}/auth/login`,
+        "/auth/login",
         {
           phone: phoneNumber,
           password: password,
@@ -28,15 +28,20 @@ export default function Login({ phone }: { phone: string }) {
         }
       )
       .then((res) => {
+        setTest("successsssss");
         Cookies.set("access_token", res.data.token, { expires: 1 }); // Expires in a day, which also checks out with the validity of the JWT server-side
         router.push(`/dashboard/${phoneNumber}`);
       })
-      .catch((error) => console.error(error));
+      .catch((error) => {
+        setTest(error.message);
+        console.error(error);
+      });
   }
 
   return (
     <div className="flex flex-col gap-10 text-black mt-20 text-xl items-center">
       <h1>Login</h1>
+      {test}
       <input
         value={phoneNumber}
         className="bg-gray-100 w-1/3"

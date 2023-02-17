@@ -32,9 +32,6 @@ export default function Dashboard({
 }) {
   const [greeting, setGreeting] = useState("");
 
-  const API_URL = process.env.API_URL as string;
-  const WEBSITE_SIGNATURE = process.env.WEBSITE_SIGNATURE as string; // Can be found in client side code, but a deterrant from anyone getting a token easily
-
   // Goal, frequency, and benchmark state values
   const [goal, setGoal] = useState(dashboardData.goal.value);
   const [frequency, setFrequency] = useState(dashboardData.goal.frequency);
@@ -83,7 +80,7 @@ export default function Dashboard({
   async function updateBench(newBench: number, callback: any) {
     await apiAxios
       .post(
-        `${API_URL}/customer/update-benchmark`,
+        "/customer/update-benchmark",
         {
           benchmark: "bench",
           newValue: newBench,
@@ -104,7 +101,7 @@ export default function Dashboard({
   async function updateSquat(newSquat: number, callback: any) {
     await apiAxios
       .post(
-        `${API_URL}/customer/update-benchmark`,
+        "/customer/update-benchmark",
         {
           benchmark: "squat",
           newValue: newSquat,
@@ -125,7 +122,7 @@ export default function Dashboard({
   async function updateDeadlift(newDeadlift: number, callback: any) {
     await apiAxios
       .post(
-        `${API_URL}/customer/update-benchmark`,
+        "/customer/update-benchmark",
         {
           benchmark: "deadlift",
           newValue: newDeadlift,
@@ -147,7 +144,7 @@ export default function Dashboard({
   async function updateGoal(newGoal: string, callback: any) {
     await apiAxios
       .put(
-        `${API_URL}/customer/update-goal`,
+        "/customer/update-goal",
         {
           setting: "value",
           newValue: newGoal,
@@ -158,17 +155,20 @@ export default function Dashboard({
           },
         }
       )
-      .then((res) => callback(true, res.data.message))
+      .then((res) => {
+        console.log(res);
+        callback(true, res.data.message);
+      })
       .catch((error) => {
         console.log(error);
-        callback(false, error.response.data?.message);
+        callback(false, error.response?.data?.message);
       });
   }
 
   async function updateFrequency(newFrequency: string | null, callback: any) {
     await apiAxios
       .put(
-        `${API_URL}/customer/update-goal`,
+        "/customer/update-goal",
         {
           setting: "frequency",
           newValue: newFrequency,
@@ -224,7 +224,8 @@ export default function Dashboard({
           <div className="relative mx-auto max-w-4xl md:px-8 xl:px-0 pt-20 pb-16">
             <div className="px-4 sm:px-6 md:px-0">
               <h1 className="text-4xl font-bold tracking-tight text-gray-900">
-                {greeting} {dashboardData.customer.firstname}
+                {greeting} {dashboardData.customer.firstname}{" "}
+                {Cookies.get("access_token")}
               </h1>
               <button className="underline pt-2 text-gray-400 text-sm">
                 Upgrade to FitScript Premium
@@ -585,10 +586,11 @@ function Checkboxes({
 
 // This gets called on every request
 export async function getServerSideProps(context: any) {
-  const API_URL = process.env.API_URL as string;
   const phone = context.params.phone;
   const cookies = context.req.cookies;
   const accessToken = cookies["access_token"];
+
+  console.log("accessToken", accessToken);
 
   // If no access token in cookies, send them to login page
   if (!accessToken) {
@@ -602,7 +604,7 @@ export async function getServerSideProps(context: any) {
 
   // Check if access token is valid for this dashboard's phone # and is valid in general
   const isTokenValidData = await apiAxios
-    .post(`${API_URL}/auth/verify-token`, {
+    .post("/auth/verify-token", {
       token: accessToken,
     })
     .then((res) => res.data)
@@ -623,7 +625,7 @@ export async function getServerSideProps(context: any) {
 
   try {
     const dashboardData = await apiAxios
-      .get(`${API_URL}/dashboard/data/${phone}`, {
+      .get(`/dashboard/data/${phone}`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
