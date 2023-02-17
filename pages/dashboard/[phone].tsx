@@ -1,6 +1,6 @@
 import { useState, Fragment, useEffect } from "react";
 import type { GetServerSideProps } from "next";
-import axios from "axios";
+import apiAxios from "../../utils/apiAxios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import type { Customer, Goal } from "../../types/db";
@@ -81,7 +81,7 @@ export default function Dashboard({
   };
 
   async function updateBench(newBench: number, callback: any) {
-    await axios
+    await apiAxios
       .post(
         `${API_URL}/customer/update-benchmark`,
         {
@@ -102,7 +102,7 @@ export default function Dashboard({
   }
 
   async function updateSquat(newSquat: number, callback: any) {
-    await axios
+    await apiAxios
       .post(
         `${API_URL}/customer/update-benchmark`,
         {
@@ -123,7 +123,7 @@ export default function Dashboard({
   }
 
   async function updateDeadlift(newDeadlift: number, callback: any) {
-    await axios
+    await apiAxios
       .post(
         `${API_URL}/customer/update-benchmark`,
         {
@@ -145,7 +145,7 @@ export default function Dashboard({
 
   // MOVE TO UTILS
   async function updateGoal(newGoal: string, callback: any) {
-    await axios
+    await apiAxios
       .put(
         `${API_URL}/customer/update-goal`,
         {
@@ -166,7 +166,7 @@ export default function Dashboard({
   }
 
   async function updateFrequency(newFrequency: string | null, callback: any) {
-    await axios
+    await apiAxios
       .put(
         `${API_URL}/customer/update-goal`,
         {
@@ -601,12 +601,14 @@ export async function getServerSideProps(context: any) {
   }
 
   // Check if access token is valid for this dashboard's phone # and is valid in general
-  const isTokenValidData = await axios
+  const isTokenValidData = await apiAxios
     .post(`${API_URL}/auth/verify-token`, {
       token: accessToken,
     })
     .then((res) => res.data)
     .catch((error) => error.response.data);
+
+  console.log("isTokenValidData", isTokenValidData, "phone", phone);
 
   if (!isTokenValidData.success || isTokenValidData.decodedPhone !== phone) {
     return {
@@ -620,7 +622,7 @@ export async function getServerSideProps(context: any) {
   // Fetch data from external API
 
   try {
-    const dashboardData = await axios
+    const dashboardData = await apiAxios
       .get(`${API_URL}/dashboard/data/${phone}`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,

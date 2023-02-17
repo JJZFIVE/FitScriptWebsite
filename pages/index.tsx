@@ -33,7 +33,6 @@ export default function Home() {
     );
 
   const RECAPTCHA_PUBLIC = process.env.RECAPTCHA_PUBLIC as string;
-  const API_URL = process.env.API_URL as string;
   const WEBSITE_SIGNATURE = process.env.WEBSITE_SIGNATURE as string; // Can be found in client side code, but a deterrant from anyone getting a token easily
 
   async function handleSubmit(e: any): Promise<void> {
