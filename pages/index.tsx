@@ -50,6 +50,7 @@ export default function Home() {
           Authorization:
             "Bearer " +
             Buffer.from(WEBSITE_SIGNATURE, "utf-8").toString("base64"),
+          "Access-Control-Allow-Origin": API_URL,
         },
       })
       .then((res) => res.data.token);
@@ -66,6 +67,7 @@ export default function Home() {
           // Bearer token necessary to protect against attacks
           headers: {
             Authorization: `Bearer ${token}`,
+            "Access-Control-Allow-Origin": API_URL,
           },
         }
       )
