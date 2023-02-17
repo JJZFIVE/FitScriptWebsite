@@ -4,6 +4,7 @@ import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import { CheckIcon } from "@heroicons/react/24/outline";
 import ReCAPTCHA from "react-google-recaptcha";
 import axios from "axios";
+import apiAxios from "../utils/apiAxios";
 import Link from "next/link";
 
 import { ToastContainer, toast } from "react-toastify";
@@ -44,21 +45,22 @@ export default function Home() {
     }
 
     // Gets a token of 10 second length, for quick operation such as signing up
-    const token = await axios
-      .get(`${API_URL}/auth/get-short-token`, {
+    const token = await apiAxios
+      .get("/auth/get-short-token", {
         headers: {
           Authorization:
             "Bearer " +
             Buffer.from(WEBSITE_SIGNATURE, "utf-8").toString("base64"),
-          "Access-Control-Allow-Origin": API_URL,
         },
       })
       .then((res) => res.data.token);
 
+    console.log("TOKEN", token);
+
     // Sign up the user. Note the authorization header
-    await axios
+    await apiAxios
       .post(
-        `${API_URL}/signup`,
+        "/signup",
         {
           phone: phone,
           firstname: firstname,
@@ -67,7 +69,6 @@ export default function Home() {
           // Bearer token necessary to protect against attacks
           headers: {
             Authorization: `Bearer ${token}`,
-            "Access-Control-Allow-Origin": API_URL,
           },
         }
       )
