@@ -87,7 +87,7 @@ export default function Dashboard({
         },
         {
           headers: {
-            Authorization: `Bearer ${Cookies.get("access_token")}`,
+            Authorization: `Bearer ${Cookies.get("fitscript_access_token")}`,
           },
         }
       )
@@ -108,7 +108,7 @@ export default function Dashboard({
         },
         {
           headers: {
-            Authorization: `Bearer ${Cookies.get("access_token")}`,
+            Authorization: `Bearer ${Cookies.get("fitscript_access_token")}`,
           },
         }
       )
@@ -129,7 +129,7 @@ export default function Dashboard({
         },
         {
           headers: {
-            Authorization: `Bearer ${Cookies.get("access_token")}`,
+            Authorization: `Bearer ${Cookies.get("fitscript_access_token")}`,
           },
         }
       )
@@ -151,16 +151,14 @@ export default function Dashboard({
         },
         {
           headers: {
-            Authorization: `Bearer ${Cookies.get("access_token")}`,
+            Authorization: `Bearer ${Cookies.get("fitscript_access_token")}`,
           },
         }
       )
       .then((res) => {
-        console.log(res);
         callback(true, res.data.message);
       })
       .catch((error) => {
-        console.log(error);
         callback(false, error.response?.data?.message);
       });
   }
@@ -175,7 +173,7 @@ export default function Dashboard({
         },
         {
           headers: {
-            Authorization: `Bearer ${Cookies.get("access_token")}`,
+            Authorization: `Bearer ${Cookies.get("fitscript_access_token")}`,
           },
         }
       )
@@ -224,8 +222,7 @@ export default function Dashboard({
           <div className="relative mx-auto max-w-4xl md:px-8 xl:px-0 pt-20 pb-16">
             <div className="px-4 sm:px-6 md:px-0">
               <h1 className="text-4xl font-bold tracking-tight text-gray-900">
-                {greeting} {dashboardData.customer.firstname}{" "}
-                {Cookies.get("access_token")}
+                {greeting} {dashboardData.customer.firstname}
               </h1>
               <button className="underline pt-2 text-gray-400 text-sm">
                 Upgrade to FitScript Premium
@@ -555,7 +552,7 @@ function Checkboxes({
   const days = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
 
   return (
-    <fieldset className="gap-3 md:gap-5 flex">
+    <fieldset className="gap-2 md:gap-5 flex">
       <legend className="sr-only">Frequency</legend>
 
       {days.map((day, idx) => (
@@ -588,9 +585,7 @@ function Checkboxes({
 export async function getServerSideProps(context: any) {
   const phone = context.params.phone;
   const cookies = context.req.cookies;
-  const accessToken = cookies["access_token"];
-
-  console.log("accessToken", accessToken);
+  const accessToken = cookies["fitscript_access_token"];
 
   // If no access token in cookies, send them to login page
   if (!accessToken) {
@@ -609,8 +604,6 @@ export async function getServerSideProps(context: any) {
     })
     .then((res) => res.data)
     .catch((error) => error.response.data);
-
-  console.log("isTokenValidData", isTokenValidData, "phone", phone);
 
   if (!isTokenValidData.success || isTokenValidData.decodedPhone !== phone) {
     return {

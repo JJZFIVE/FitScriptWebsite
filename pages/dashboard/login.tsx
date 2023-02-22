@@ -1,6 +1,8 @@
 import Cookies from "js-cookie";
 import { useState } from "react";
 import { useRouter } from "next/router";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import apiAxios from "../../utils/apiAxios";
 
 export default function Login({ phone }: { phone: string }) {
@@ -11,9 +13,16 @@ export default function Login({ phone }: { phone: string }) {
 
   const WEBSITE_SIGNATURE = process.env.WEBSITE_SIGNATURE as string;
 
+  // Toast stuff
+  const toastError = (message: string) =>
+    toast.error(message ? `Error: ${message}` : "Unknown error occurred");
+
   async function signin() {
-    await apiAxios
-      .post(
+    // Check if valid phone number in system
+    try {
+      await apiAxios.get(`/customer/check-valid-number/${phoneNumber}`);
+
+      const loginData = await apiAxios.post(
         "/auth/login",
         {
           phone: phoneNumber,
@@ -26,20 +35,32 @@ export default function Login({ phone }: { phone: string }) {
               Buffer.from(WEBSITE_SIGNATURE, "utf-8").toString("base64"),
           },
         }
-      )
-      .then((res) => {
-        setTest("successsssss");
-        Cookies.set("access_token", res.data.token, { expires: 1 }); // Expires in a day, which also checks out with the validity of the JWT server-side
-        router.push(`/dashboard/${phoneNumber}`);
-      })
-      .catch((error) => {
-        setTest(error.message);
-        console.error(error);
+      );
+
+      // Expires in a day, which also checks out with the validity of the JWT server-side
+      Cookies.set("fitscript_access_token", loginData.data.token, {
+        expires: 1,
       });
+      router.push(`/dashboard/${phoneNumber}`);
+    } catch (error: any) {
+      toastError(error?.response?.data?.message);
+    }
   }
 
   return (
     <div className="flex flex-col gap-10 text-black mt-20 text-xl items-center">
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
       <h1>Login</h1>
       {test}
       <input
@@ -53,7 +74,10 @@ export default function Login({ phone }: { phone: string }) {
         onChange={(e) => setPassword(e.target.value)}
       ></input>
 
-      <button className="px-4 py-2 bg-red-500" onClick={signin}>
+      <button
+        className="px-6 py-3 bg-green-300 rounded-full text-3xl"
+        onClick={signin}
+      >
         Log In
       </button>
     </div>
@@ -67,8 +91,27 @@ export async function getServerSideProps(context: any) {
   if (phone && phone.startsWith(" ")) phone = "+" + phone.trim();
   phone = phone ? phone : "";
 
-  // TODO If they already have a valid access token for this login page, automatically log them in
-  // Right? ^
+  const cookies = context.req.cookies;
+  const accessToken = cookies["fitscript_access_token"];
+
+  // Check if access token is valid for this dashboard's phone # and is valid in general
+  const isTokenValidData = await apiAxios
+    .post("/auth/verify-token", {
+      token: accessToken,
+    })
+    .then((res) => res.data)
+    .catch((error) => error.response.data);
+
+  if (isTokenValidData.success && isTokenValidData.decodedPhone == phone) {
+    return {
+      redirect: {
+        destination: `/dashboard/${phone}`,
+        permanent: false,
+      },
+    };
+  }
+
+  // Fetch data from external API
 
   return { props: { phone } };
 }

@@ -17,7 +17,31 @@ const navigation = [
   { name: "Company", href: "#" },
 ];
 
-export default function Home() {
+function DashboardButton({ tokenPhone }: { tokenPhone: string | null }) {
+  if (!tokenPhone) {
+    return (
+      <div className="hidden lg:flex lg:flex-1 lg:justify-end ">
+        <Link href="/dashboard/login">
+          <button className="text-sm font-semibold leading-6 text-[#30CD5A]">
+            Login <span aria-hidden="true">&rarr;</span>
+          </button>
+        </Link>
+      </div>
+    );
+  }
+
+  return (
+    <div className="hidden lg:flex lg:flex-1 lg:justify-end ">
+      <Link href={`/dashboard/${tokenPhone}`}>
+        <button className="text-sm font-semibold leading-6 text-[#30CD5A]">
+          Dashboard <span aria-hidden="true">&rarr;</span>
+        </button>
+      </Link>
+    </div>
+  );
+}
+
+export default function Home({ tokenPhone }: { tokenPhone: string | null }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [phone, setPhone] = useState(""); // The actual phone #, with no formatting
   const [recaptchaSuccess, setRecaptchaSuccess] = useState(false); // The value of the recaptcha
@@ -206,13 +230,7 @@ export default function Home() {
           </div>
 
           {/* TODO: DYNAMICALLY ROUTE TO THEIR PAGE */}
-          <div className="hidden lg:flex lg:flex-1 lg:justify-end ">
-            <Link href="/dashboard/+13027409745">
-              <button className="text-sm font-semibold leading-6 text-[#30CD5A]">
-                Dashboard <span aria-hidden="true">&rarr;</span>
-              </button>
-            </Link>
-          </div>
+          <DashboardButton tokenPhone={tokenPhone} />
         </nav>
         <Dialog as="div" open={mobileMenuOpen} onClose={setMobileMenuOpen}>
           <Dialog.Panel className="fixed inset-0 z-10 overflow-y-auto bg-white px-6 py-6 lg:hidden">
@@ -354,4 +372,40 @@ export default function Home() {
       </div>
     </div>
   );
+}
+
+// This gets called on every request
+export async function getServerSideProps(context: any) {
+  const cookies = context.req.cookies;
+  const accessToken = cookies["fitscript_access_token"];
+
+  if (accessToken) {
+    // Check if access token is valid for this dashboard's phone # and is valid in general
+    const isTokenValidData = await apiAxios
+      .post("/auth/verify-token", {
+        token: accessToken,
+      })
+      .then((res) => res.data)
+      .catch((error) => error.response.data);
+
+    // Pass data to the page via props
+    if (!isTokenValidData)
+      return {
+        props: {
+          tokenPhone: null,
+        },
+      };
+
+    return {
+      props: {
+        tokenPhone: isTokenValidData.decodedPhone,
+      },
+    };
+  }
+
+  return {
+    props: {
+      tokenPhone: null,
+    },
+  };
 }
