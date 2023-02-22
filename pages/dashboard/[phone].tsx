@@ -585,6 +585,18 @@ function Checkboxes({
 export async function getServerSideProps(context: any) {
   const phone = context.params.phone;
   const cookies = context.req.cookies;
+  if (!cookies) {
+    console.log("No cookies found");
+    return {
+      redirect: {
+        destination: `/dashboard/login?phone=${phone}`,
+        permanent: false,
+      },
+    };
+  }
+
+  console.log("cookies found", cookies);
+
   const accessToken = cookies["fitscript_access_token"];
 
   // If no access token in cookies, send them to login page
