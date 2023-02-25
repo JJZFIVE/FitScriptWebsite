@@ -306,7 +306,7 @@ export default function Dashboard({
                                 className="rounded-2xl px-2 py-1 text-sm bg-black font-medium text-white hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-gray-800 focus:ring-offset-2"
                                 onClick={() => setUpdatingGoal(true)}
                               >
-                                Update
+                                Edit
                               </button>
                             </span>
                           ) : (
@@ -363,7 +363,7 @@ export default function Dashboard({
                                 className="rounded-2xl px-2 py-1 text-sm bg-black font-medium text-white hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-gray-800 focus:ring-offset-2"
                                 onClick={() => setUpdatingFrequency(true)}
                               >
-                                Update
+                                Edit
                               </button>
                             </span>
                           ) : (
@@ -480,7 +480,7 @@ export default function Dashboard({
                                     ].updatingFunction(true)
                                   }
                                 >
-                                  Update
+                                  Edit
                                 </button>
                               </span>
                             ) : (
@@ -555,7 +555,7 @@ function Checkboxes({
   const days = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
 
   return (
-    <fieldset className="gap-2 md:gap-5 flex">
+    <fieldset className="gap-1 md:gap-5 flex">
       <legend className="sr-only">Frequency</legend>
 
       {days.map((day, idx) => (
