@@ -4,6 +4,7 @@ import { useRouter } from "next/router";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import apiAxios from "../../utils/apiAxios";
+import Link from "next/link";
 
 export default function Login({ phone }: { phone: string }) {
   const router = useRouter();
@@ -48,7 +49,7 @@ export default function Login({ phone }: { phone: string }) {
   }
 
   return (
-    <div className="flex flex-col gap-10 text-black mt-20 text-xl items-center">
+    <div className="flex flex-col text-black mt-20 text-xl items-center">
       <ToastContainer
         position="top-right"
         autoClose={3000}
@@ -61,21 +62,38 @@ export default function Login({ phone }: { phone: string }) {
         pauseOnHover
         theme="light"
       />
-      <h1>Login</h1>
+      {/* Icon in top left, "Navbar" */}
+      <div className="absolute inset-x-0 top-0 z-10 py-3 mx-4 flex gap-4 text-gray-900 items-center">
+        <Link href="/">
+          <button onClick={() => {}}>
+            <img src="/placeholder.png" alt="" height="50" width="50" />
+          </button>
+        </Link>
+        <span className="text-2xl">FitScript</span>
+      </div>
+
+      <h1 className="text-4xl">Log In</h1>
+      <p className="text-sm text-gray-600 w-2/3 sm:w-1/3 text-center pt-5">
+        Enter your phone number starting with +1 with no other special
+        characters. You do not need to enter your password - just press log in.
+      </p>
+      <p className="text-sm text-gray-400 w-2/3 sm:w-1/3 text-center pt-5">
+        This page will be developed soon.
+      </p>
       {test}
       <input
         value={phoneNumber}
-        className="bg-gray-100 w-1/3"
+        className="bg-gray-100 w-2/3 sm:w-1/3 mt-7"
         onChange={(e) => setPhoneNumber(e.target.value)}
       ></input>
       <input
         value={password}
-        className="bg-gray-100 w-1/3"
+        className="bg-gray-100 w-2/3 sm:w-1/3 mt-7"
         onChange={(e) => setPassword(e.target.value)}
       ></input>
 
       <button
-        className="px-6 py-3 bg-green-300 rounded-full text-3xl"
+        className="px-6 py-3 bg-green-400 rounded-full text-3xl mt-10"
         onClick={signin}
       >
         Log In

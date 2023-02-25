@@ -229,7 +229,6 @@ export default function Home({ tokenPhone }: { tokenPhone: string | null }) {
             ))}
           </div>
 
-          {/* TODO: DYNAMICALLY ROUTE TO THEIR PAGE */}
           <DashboardButton tokenPhone={tokenPhone} />
         </nav>
         <Dialog as="div" open={mobileMenuOpen} onClose={setMobileMenuOpen}>
@@ -265,14 +264,12 @@ export default function Home({ tokenPhone }: { tokenPhone: string | null }) {
                     </a>
                   ))}
                 </div>
-                <div className="py-6">
-                  <a
-                    href="#"
-                    className="-mx-3 block rounded-lg py-2.5 px-3 text-base font-semibold leading-6 text-gray-900 hover:bg-gray-400/10"
-                  >
-                    Log in
-                  </a>
-                </div>
+
+                <Link href="/dashboard/login">
+                  <button className="w-full py-6 -mx-2 block rounded-lg text-start px-3 text-base font-semibold leading-6 hover:bg-gray-400/10 text-[#30CD5A]">
+                    Login <span aria-hidden="true">&rarr;</span>
+                  </button>
+                </Link>
               </div>
             </div>
           </Dialog.Panel>
