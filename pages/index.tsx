@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Dialog } from "@headlessui/react";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import { CheckIcon } from "@heroicons/react/24/outline";
@@ -46,7 +46,6 @@ export default function Home({ tokenPhone }: { tokenPhone: string | null }) {
   const [phone, setPhone] = useState(""); // The actual phone #, with no formatting
   const [recaptchaSuccess, setRecaptchaSuccess] = useState(false); // The value of the recaptcha
   const [errorMsg, setErrorMsg] = useState(""); // The error message to display on toast
-  const [allowSignup, setAllowSignup] = useState(false);
   const [firstname, setFirstname] = useState("");
   const [showCheckIcon, setShowCheckIcon] = useState(false);
 
@@ -62,7 +61,21 @@ export default function Home({ tokenPhone }: { tokenPhone: string | null }) {
   async function handleSubmit(e: any): Promise<void> {
     e.preventDefault();
 
-    if (!allowSignup) {
+    let errorMsg = "";
+    let errored = false;
+
+    if (phone.length !== 12) {
+      errorMsg = "Please enter a valid phone number";
+      errored = true;
+    } else if (!phone.startsWith("+1")) {
+      errorMsg = "Phone # must start with +1";
+      errored = true;
+    } else if (!recaptchaSuccess) {
+      errorMsg = "Please complete the reCAPTCHA";
+      errored = true;
+    }
+
+    if (errored) {
       toastError(errorMsg);
       return;
     }
@@ -77,8 +90,6 @@ export default function Home({ tokenPhone }: { tokenPhone: string | null }) {
         },
       })
       .then((res) => res.data.token);
-
-    console.log("TOKEN", token);
 
     // Sign up the user. Note the authorization header
     await apiAxios
@@ -113,43 +124,17 @@ export default function Home({ tokenPhone }: { tokenPhone: string | null }) {
 
   async function validateRecaptcha(value: string | null): Promise<void> {
     if (!value) {
+      setRecaptchaSuccess(false);
       return;
     }
 
     const validated = await axios
       .get(`/api/validateRecaptcha/${value}`)
       .then((res) => res.data);
+
     if (validated.success) setRecaptchaSuccess(true);
     else setRecaptchaSuccess(false);
   }
-
-  useEffect(() => {
-    setAllowSignup(false);
-
-    if (phone.length !== 12) {
-      setErrorMsg("Please enter a valid phone number");
-      setAllowSignup(false);
-      setShowCheckIcon(false);
-      return;
-    } else if (!phone.startsWith("+1")) {
-      setErrorMsg("Phone # must start with +1");
-      setAllowSignup(false);
-      setShowCheckIcon(false);
-      return;
-    } else {
-      setShowCheckIcon(true);
-    }
-
-    if (!recaptchaSuccess) {
-      setErrorMsg("Please complete the reCAPTCHA");
-      setAllowSignup(false);
-      setShowCheckIcon(false);
-      return;
-    }
-
-    setErrorMsg("");
-    setAllowSignup(true);
-  }, [recaptchaSuccess, phone]);
 
   return (
     <div className="relative isolate bg-gray-100 min-h-screen">
