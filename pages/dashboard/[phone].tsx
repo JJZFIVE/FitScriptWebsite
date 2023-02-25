@@ -1,9 +1,7 @@
-import { useState, Fragment, useEffect } from "react";
-import type { GetServerSideProps } from "next";
+import { useState, useEffect } from "react";
 import apiAxios from "../../utils/apiAxios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import type { Customer, Goal } from "../../types/db";
 import type { DashboardData } from "../../types/dashboard";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
@@ -84,6 +82,7 @@ export default function Dashboard({
         {
           benchmark: "bench",
           newValue: newBench,
+          phone: dashboardData.customer.phone,
         },
         {
           headers: {
@@ -105,6 +104,7 @@ export default function Dashboard({
         {
           benchmark: "squat",
           newValue: newSquat,
+          phone: dashboardData.customer.phone,
         },
         {
           headers: {
@@ -126,6 +126,7 @@ export default function Dashboard({
         {
           benchmark: "deadlift",
           newValue: newDeadlift,
+          phone: dashboardData.customer.phone,
         },
         {
           headers: {
@@ -148,6 +149,7 @@ export default function Dashboard({
         {
           setting: "value",
           newValue: newGoal,
+          phone: dashboardData.customer.phone,
         },
         {
           headers: {
@@ -170,6 +172,7 @@ export default function Dashboard({
         {
           setting: "frequency",
           newValue: newFrequency,
+          phone: dashboardData.customer.phone,
         },
         {
           headers: {
