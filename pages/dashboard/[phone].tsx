@@ -588,16 +588,6 @@ export async function getServerSideProps(context: any) {
 
   const accessToken = cookies ? cookies["fitscript_access_token"] : null;
 
-  // If no access token in cookies, send them to login page
-  if (!accessToken) {
-    return {
-      redirect: {
-        destination: `/dashboard/login?phone=${phone}`,
-        permanent: false,
-      },
-    };
-  }
-
   // Check if access token is valid for this dashboard's phone # and is valid in general
   const isTokenValidData = await apiAxios
     .post("/auth/verify-token", {
