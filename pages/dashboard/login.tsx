@@ -120,14 +120,15 @@ export async function getServerSideProps(context: any) {
     .then((res) => res.data)
     .catch((error) => error.response.data);
 
-  if (isTokenValidData.success && isTokenValidData.decodedPhone == phone) {
-    return {
-      redirect: {
-        destination: `/dashboard/${phone}`,
-        permanent: false,
-      },
-    };
-  }
+  // TODO: Figure out why the phone and login page causes an infinite redirect loop
+  // if (isTokenValidData.success && isTokenValidData.decodedPhone == phone) {
+  //   return {
+  //     redirect: {
+  //       destination: `/dashboard/${phone}`,
+  //       permanent: false,
+  //     },
+  //   };
+  // }
 
   // Fetch data from external API
 
